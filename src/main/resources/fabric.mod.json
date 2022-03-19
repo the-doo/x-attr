@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "x-attr",
+  "version": "${version}",
+  "name": "X Attr",
+  "description": "Attributes Api",
+  "authors": [
+    "doo"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/x-attr/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.doo.xattr.client.XAttrClient"
+    ],
+    "main": [
+      "com.doo.xattr.XAttr"
+    ]
+  },
+  "mixins": [
+    "x-attr.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.13.3",
+    "fabric": "*",
+    "minecraft": ["1.18.X", "1.17.X"]
+  }
+}
