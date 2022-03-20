@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "x-attr",
   "version": "${version}",
-  "name": "X Attr",
+  "name": "X-Attr",
   "description": "Attributes Api",
   "authors": [
     "doo"
