@@ -2,9 +2,9 @@ package com.doo.xattr.events;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.Arrays;
 
@@ -80,12 +80,12 @@ public interface LivingDamageApi {
     }
 
     static float damage(float amount, DamageSource source, LivingEntity target) {
-        amount += LivingDamageApi.ADD.invoker().get(source, source.getAttacker(), target);
+        amount += LivingDamageApi.ADD.invoker().get(source, source.getEntity(), target);
         if (amount <= 0) {
             return 0;
         }
 
-        amount *= (1 + LivingDamageApi.MULTIPLIER.invoker().get(source, source.getAttacker(), target) / 100F);
+        amount *= (1 + LivingDamageApi.MULTIPLIER.invoker().get(source, source.getEntity(), target) / 100F);
         if (amount <= 0) {
             return 0;
         }
@@ -93,12 +93,12 @@ public interface LivingDamageApi {
     }
 
     static float realDamage(float amount, DamageSource source, LivingEntity target) {
-        amount += LivingDamageApi.REAL_ADD.invoker().get(source, source.getAttacker(), target);
+        amount += LivingDamageApi.REAL_ADD.invoker().get(source, source.getEntity(), target);
         if (amount <= 0) {
             return 0;
         }
 
-        amount *= (1 + LivingDamageApi.REAL_MULTIPLIER.invoker().get(source, source.getAttacker(), target) / 100F);
+        amount *= (1 + LivingDamageApi.REAL_MULTIPLIER.invoker().get(source, source.getEntity(), target) / 100F);
         if (amount <= 0) {
             return 0;
         }

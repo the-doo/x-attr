@@ -3,11 +3,11 @@ package com.doo.xattr.mixin;
 import com.doo.xattr.XAttr;
 import com.doo.xattr.events.ItemApi;
 import com.google.common.collect.Multimap;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,13 +19,13 @@ import java.util.Random;
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
 
-    @Inject(method = "damage(ILjava/util/Random;Lnet/minecraft/server/network/ServerPlayerEntity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/enchantment/EnchantmentHelper;getLevel(Lnet/minecraft/enchantment/Enchantment;Lnet/minecraft/item/ItemStack;)I"))
-    private void usedCallback(int amount, Random random, ServerPlayerEntity player, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getItemEnchantmentLevel(Lnet/minecraft/world/item/enchantment/Enchantment;Lnet/minecraft/world/item/ItemStack;)I"))
+    private void usedCallback(int amount, Random random, ServerPlayer player, CallbackInfoReturnable<Boolean> cir) {
         ItemApi.WILL_DAMAGE.invoker().call(player, XAttr.get(this), amount);
     }
 
     @ModifyVariable(method = "getAttributeModifiers", at = @At(value = "RETURN"))
-    private Multimap<EntityAttribute, EntityAttributeModifier> opModifiers(Multimap<EntityAttribute, EntityAttributeModifier> map, EquipmentSlot slot) {
+    private Multimap<Attribute, AttributeModifier> opModifiers(Multimap<Attribute, AttributeModifier> map, EquipmentSlot slot) {
         ItemApi.OP_MODIFIER.invoker().mod(map, XAttr.get(this), slot);
         return map;
     }

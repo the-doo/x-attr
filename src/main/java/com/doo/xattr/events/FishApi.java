@@ -2,7 +2,7 @@ package com.doo.xattr.events;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Arrays;
 
@@ -19,6 +19,6 @@ public interface FishApi {
 
     @FunctionalInterface
     interface OnCaught {
-        void onCaught(PlayerEntity player);
+        void onCaught(Player player);
     }
 }

@@ -2,13 +2,13 @@ package com.doo.xattr.events;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -37,7 +37,7 @@ public interface PersistentApi {
 
     @FunctionalInterface
     interface OnColl {
-        Entity getEntity(Entity player, ItemStack stack, World world, Vec3d pos, Box box);
+        Entity getEntity(Entity player, ItemStack stack, Level world, Vec3 pos, AABB box);
     }
 
     @FunctionalInterface
@@ -45,7 +45,7 @@ public interface PersistentApi {
         float get(Entity owner, @Nullable ItemStack stack);
     }
 
-    static float projSpeed(float speed, PersistentProjectileEntity entity, ItemStack shooter) {
+    static float projSpeed(float speed, Projectile entity, ItemStack shooter) {
         Entity owner = entity.getOwner();
         if (owner instanceof LivingEntity && shooter != null) {
             speed += PersistentApi.ADD.invoker().get(owner, shooter);
