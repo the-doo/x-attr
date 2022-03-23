@@ -1,9 +1,7 @@
 package com.doo.xattr.mixin;
 
 import com.doo.xattr.XAttr;
-import com.doo.xattr.events.EntityArmorApi;
 import com.doo.xattr.events.LivingApi;
-import com.doo.xattr.events.LivingDamageApi;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -42,26 +40,26 @@ public abstract class LivingEntityMixin {
 
     @ModifyArg(method = "getArmorValue", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;floor(D)I"))
     private double armor(double value) {
-        return EntityArmorApi.armor(value, XAttr.get(this));
+        return LivingApi.Armor.armor(XAttr.get(this), value);
     }
 
     @ModifyVariable(method = "actuallyHurt", at = @At(value = "STORE", ordinal = 0), argsOnly = true)
-    private float damageAmount(float amount, DamageSource source) {
-        return LivingDamageApi.damage(amount, source, XAttr.get(this));
+    private float hurtValue(float amount, DamageSource source) {
+        return (float) LivingApi.Hurt.op(amount, source, XAttr.get(this), false);
     }
 
     @ModifyVariable(method = "actuallyHurt", at = @At(value = "STORE", ordinal = 1), argsOnly = true)
-    private float realDamageAmount(float amount, DamageSource source) {
-        return LivingDamageApi.realDamage(amount, source, XAttr.get(this));
+    private float realHurtValue(float amount, DamageSource source) {
+        return (float) LivingApi.Hurt.op(amount, source, XAttr.get(this), true);
     }
 
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;recordDamage(Lnet/minecraft/world/damagesource/DamageSource;FF)V"))
-    private void damageCallback(DamageSource source, float amount, CallbackInfo ci) {
-        LivingDamageApi.ON_DAMAGED.invoker().call(source, source.getEntity(), XAttr.get(this), amount);
+    private void onHurt(DamageSource source, float amount, CallbackInfo ci) {
+        LivingApi.Hurt.ON_DAMAGED.invoker().call(source, source.getEntity(), XAttr.get(this), amount);
     }
 
     @Inject(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/effect/MobEffectInstance;getEffect()Lnet/minecraft/world/effect/MobEffect;", ordinal = 0), cancellable = true)
-    private void addStatusEffect(MobEffectInstance effect, Entity source, CallbackInfoReturnable<Boolean> cir) {
+    private void checkEffect(MobEffectInstance effect, Entity source, CallbackInfoReturnable<Boolean> cir) {
         if (LivingApi.IGNORED_APPLY_STATUS.invoker().ignored(XAttr.get(this), effect.getEffect(), source)) {
             cir.setReturnValue(true);
             cir.cancel();
