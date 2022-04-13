@@ -1,6 +1,7 @@
 package com.doo.xattr.mixin;
 
 import com.doo.xattr.XAttr;
+import com.doo.xattr.attribute.ExAttributes;
 import com.doo.xattr.events.LivingApi;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -43,19 +44,14 @@ public abstract class LivingEntityMixin {
         return LivingApi.Armor.armor(XAttr.get(this), value);
     }
 
-    @ModifyVariable(method = "actuallyHurt", at = @At(value = "STORE", ordinal = 0), argsOnly = true)
-    private float hurtValue(float amount, DamageSource source) {
-        return (float) LivingApi.Hurt.op(amount, source, XAttr.get(this), false);
-    }
-
     @ModifyVariable(method = "actuallyHurt", at = @At(value = "STORE", ordinal = 1), argsOnly = true)
-    private float realHurtValue(float amount, DamageSource source) {
-        return (float) LivingApi.Hurt.op(amount, source, XAttr.get(this), true);
+    private float opHurtRealValue(float amount, DamageSource source) {
+        return (float) XAttr.opValue(amount, ((LivingEntity) XAttr.get(this)).getAttribute(ExAttributes.Living.Hurt.REAL_VALUE));
     }
 
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;recordDamage(Lnet/minecraft/world/damagesource/DamageSource;FF)V"))
     private void onHurt(DamageSource source, float amount, CallbackInfo ci) {
-        LivingApi.Hurt.ON_DAMAGED.invoker().call(source, source.getEntity(), XAttr.get(this), amount);
+        LivingApi.Hurt.ON_DAMAGED.invoker().call(source, source.getEntity(), XAttr.get(this), amount, false);
     }
 
     @Inject(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/effect/MobEffectInstance;getEffect()Lnet/minecraft/world/effect/MobEffect;", ordinal = 0), cancellable = true)

@@ -108,7 +108,7 @@ publishing {
         // The repositories here will be used for publishing your artifact, not for
         // retrieving dependencies.
         maven {
-            name = "GitHubPackages"
+            name = "XAttrPackages"
             url = uri("https://maven.pkg.github.com/the-doo/x-attr")
             credentials {
                 username = "the-doo"

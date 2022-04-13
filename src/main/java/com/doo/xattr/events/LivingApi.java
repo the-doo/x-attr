@@ -1,5 +1,6 @@
 package com.doo.xattr.events;
 
+import com.doo.xattr.XAttr;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.world.damagesource.DamageSource;
@@ -9,7 +10,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Arrays;
-import java.util.function.Supplier;
 
 /**
  * Living Entity Api
@@ -107,17 +107,22 @@ public interface LivingApi {
          * amount - value of target health is changed
          */
         Event<OnHurt> ON_DAMAGED = EventFactory.createArrayBacked(OnHurt.class, callback ->
-                ((source, attacker, target, amount) -> Arrays.stream(callback).forEach(c -> c.call(source, attacker, target, amount))));
+                ((source, attacker, target, amount, isCritAttack) -> Arrays.stream(callback).forEach(c -> c.call(source, attacker, target, amount, isCritAttack))));
 
         @FunctionalInterface
         interface OnHurt {
-            void call(DamageSource source, Entity attacker, LivingEntity target, float amount);
+            void call(DamageSource source, Entity attacker, LivingEntity target, float amount, boolean isCritAttack);
         }
 
-        static double op(double amount, DamageSource source, LivingEntity target, boolean isReal) {
-            Event<HurtValue> add = isReal ? REAL_ADD : ADD;
-            Event<HurtValue> total = isReal ? REAL_MULTIPLIER : MULTIPLIER;
-            return opValue(amount, () -> add.invoker().get(source, source.getEntity(), target), () -> total.invoker().get(source, source.getEntity(), target));
+        /**
+         * Attack is Crit
+         */
+        Event<OnCrit> ON_CRIT = EventFactory.createArrayBacked(OnCrit.class, callback ->
+                ((source, attacker, target, amount) -> Arrays.stream(callback).forEach(c -> c.crit(source, attacker, target, amount))));
+
+        @FunctionalInterface
+        interface OnCrit {
+            void crit(DamageSource source, Entity attacker, LivingEntity target, float amount);
         }
     }
 
@@ -137,28 +142,7 @@ public interface LivingApi {
         }
 
         static double armor(LivingEntity living, double base) {
-            return opValue(base, () -> ADD.invoker().get(living, base), () -> MULTIPLIER.invoker().get(living, base));
+            return XAttr.opValue(base, () -> ADD.invoker().get(living, base), () -> MULTIPLIER.invoker().get(living, base));
         }
-    }
-
-    /**
-     * Operation Value
-     *
-     * @param base     base value
-     * @param addition add value
-     * @param total    multiplier value
-     * @return value after operation
-     */
-    static double opValue(double base, Supplier<Double> addition, Supplier<Double> total) {
-        base += addition.get();
-        if (base <= 0) {
-            return 0;
-        }
-
-        base *= (1 + total.get() / 100F);
-        if (base <= 0) {
-            return 0;
-        }
-        return base;
     }
 }
