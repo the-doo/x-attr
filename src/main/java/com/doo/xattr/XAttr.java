@@ -23,6 +23,11 @@ public class XAttr implements ModInitializer {
         return (T) o;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T get(Object o, Class<T> t) {
+        return (T) o;
+    }
+
     /**
      * Operation Value
      *

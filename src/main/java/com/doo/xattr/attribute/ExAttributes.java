@@ -15,11 +15,10 @@ public interface ExAttributes {
         /**
          * extra xp of add
          */
-        Attribute  XP = new RangedAttribute("ex.xp_add", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        Attribute XP = new RangedAttribute("ex.xp_add", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
 
         interface Hurt {
-            Attribute SPEED = new RangedAttribute("ex.hurt.speed", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
             Attribute INTERVAL = new RangedAttribute("ex.hurt.interval", 0, Integer.MIN_VALUE, 10);
 
@@ -27,7 +26,7 @@ public interface ExAttributes {
 
             /**
              * if rate is 50 then effect on entity is 0.05
-             *
+             * <p>
              * value is 10x
              */
             Attribute CRIT_RATE = new RangedAttribute("ex.hurt.crit_range", 0, Integer.MIN_VALUE, Integer.MAX_VALUE);

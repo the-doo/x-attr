@@ -5,7 +5,12 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "AnvilMenuMixin",
+    "AttrInstanceMixin",
+    "AttrMapAccessor",
+    "AttrModMixin",
+    "ClientMixin",
     "FishingHookMixin",
+    "GameModeMixin",
     "GrindstoneScreenHandlerMixin",
     "ItemStackMixin",
     "LivingEntityMixin",

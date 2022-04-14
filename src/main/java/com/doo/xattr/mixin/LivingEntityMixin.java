@@ -3,10 +3,13 @@ package com.doo.xattr.mixin;
 import com.doo.xattr.XAttr;
 import com.doo.xattr.attribute.ExAttributes;
 import com.doo.xattr.events.LivingApi;
+import com.doo.xattr.interfaces.Expirable;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,14 +20,29 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
 
     @Shadow
     protected int useItemRemaining;
 
+    @Shadow
+    public abstract AttributeMap getAttributes();
+
     @Inject(method = "tick", at = @At(value = "TAIL"))
     private void tickT(CallbackInfo ci) {
+        // remove expired attr
+        ((AttrMapAccessor) XAttr.get(getAttributes())).getAttributes().forEach((a, i) -> {
+            Set<AttributeModifier> expired = i.getModifiers()
+                    .stream()
+                    .filter(m -> ((Expirable) XAttr.get(m)).isExpired())
+                    .collect(Collectors.toSet());
+            expired.forEach(i::removeModifier);
+        });
+
         LivingEntity living = XAttr.get(this);
         if (!living.level.isClientSide()) {
             LivingApi.SEVER_TAIL_TICK.invoker().tick(living);
