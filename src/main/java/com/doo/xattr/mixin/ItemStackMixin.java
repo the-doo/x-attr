@@ -19,6 +19,14 @@ import java.util.Random;
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
 
+    @Inject(method = "getMaxDamage", at = @At(value = "RETURN"), cancellable = true)
+    private void opMaxDamage(CallbackInfoReturnable<Integer> cir) {
+        ItemStack stack = XAttr.get(this);
+        cir.setReturnValue((int) XAttr.opValue(cir.getReturnValue(),
+                () -> ItemApi.ADD_MAX_DAMAGE.invoker().op(stack),
+                () -> ItemApi.TOTAL_MAX_DAMAGE.invoker().op(stack)));
+    }
+
     @Inject(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getItemEnchantmentLevel(Lnet/minecraft/world/item/enchantment/Enchantment;Lnet/minecraft/world/item/ItemStack;)I"))
     private void usedCallback(int amount, Random random, ServerPlayer player, CallbackInfoReturnable<Boolean> cir) {
         ItemApi.WILL_DAMAGE.invoker().call(player, XAttr.get(this), amount);

@@ -1,7 +1,7 @@
 package com.doo.xattr.mixin;
 
 import com.doo.xattr.XAttr;
-import com.doo.xattr.events.PersistentApi;
+import com.doo.xattr.events.AbstractArrowApi;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractArrow.class)
-public abstract class PersistentProjectileEntityMixin {
+public abstract class AbstractArrowMixin {
 
     private ItemStack itemStack;
 
@@ -47,7 +47,7 @@ public abstract class PersistentProjectileEntityMixin {
     @Inject(method = "findHitEntity", at = @At("HEAD"), cancellable = true)
     private void getEntityCollisionT(Vec3 currentPosition, Vec3 nextPosition, CallbackInfoReturnable<EntityHitResult> cir) {
         Projectile p = XAttr.get(this);
-        Entity entity = PersistentApi.ON_COLL.invoker().getEntity(p.getOwner(), itemStack, p.level, currentPosition, p.getBoundingBox());
+        Entity entity = AbstractArrowApi.ON_COLL.invoker().getEntity(p.getOwner(), itemStack, p.level, currentPosition, p.getBoundingBox());
         if (entity != null) {
             cir.setReturnValue(new EntityHitResult(entity));
             cir.cancel();
@@ -56,6 +56,6 @@ public abstract class PersistentProjectileEntityMixin {
 
     @ModifyVariable(method = "shoot", at = @At(value = "HEAD"), argsOnly = true, ordinal = 0)
     private float setSpeedH(float speed, double x, double y, double z, float divergence) {
-        return PersistentApi.projSpeed(speed, XAttr.get(this), itemStack);
+        return AbstractArrowApi.projSpeed(speed, XAttr.get(this), itemStack);
     }
 }

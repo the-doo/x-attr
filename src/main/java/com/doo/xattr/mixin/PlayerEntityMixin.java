@@ -19,23 +19,23 @@ public abstract class PlayerEntityMixin {
 
     @ModifyVariable(method = "attack", at = @At(value = "STORE", ordinal = 1), ordinal = 2)
     private boolean opCritRate(boolean isCrit, Entity entity) {
-        isCrit = isCrit || Math.random() <= XAttr.opValue(0, ((LivingEntity) XAttr.get(this)).getAttribute(ExAttributes.Living.Hurt.CRIT_RATE)) / 100;
+        isCrit = isCrit || LivingApi.Hurt.IS_CRIT.invoker().crit(XAttr.get(this), entity);
         return isCritAttack = isCrit;
     }
 
     @ModifyConstant(method = "attack", constant = @Constant(floatValue = 1.5F))
     private float opCritValue(float critValue) {
-        return (float) (critValue + XAttr.opValue(0, ((LivingEntity) XAttr.get(this)).getAttribute(ExAttributes.Living.Hurt.CRIT_VALUE)));
+        return (float) (critValue + XAttr.opValue(0, ((LivingEntity) XAttr.get(this)).getAttribute(ExAttributes.Hurt.CRIT_VALUE)));
     }
 
     @ModifyVariable(method = "attack", at = @At(value = "STORE", ordinal = 4), ordinal = 4)
     private float opSweepingValue(float sweepingHurt) {
-        return (int) XAttr.opValue(sweepingHurt, ((LivingEntity) XAttr.get(this)).getAttribute(ExAttributes.Living.Hurt.SWEEPING_VALUE));
+        return (int) XAttr.opValue(sweepingHurt, ((LivingEntity) XAttr.get(this)).getAttribute(ExAttributes.Hurt.SWEEPING_VALUE));
     }
 
     @ModifyArg(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"))
     private AABB opSweepingRange(AABB box) {
-        double value = (int) XAttr.opValue(0, ((LivingEntity) XAttr.get(this)).getAttribute(ExAttributes.Living.Hurt.SWEEPING_RANGE));
+        double value = (int) XAttr.opValue(0, ((LivingEntity) XAttr.get(this)).getAttribute(ExAttributes.Hurt.SWEEPING_RANGE));
         return box.inflate(value, 0, value);
     }
 
@@ -46,11 +46,14 @@ public abstract class PlayerEntityMixin {
 
     @ModifyVariable(method = "actuallyHurt", at = @At(value = "STORE", ordinal = 1), argsOnly = true)
     private float opHurtRealValue(float amount, DamageSource source) {
-        return (float) XAttr.opValue(amount, ((LivingEntity) XAttr.get(this)).getAttribute(ExAttributes.Living.Hurt.REAL_VALUE));
+        return (float) XAttr.opValue(amount, ((LivingEntity) XAttr.get(this)).getAttribute(ExAttributes.Hurt.REAL_VALUE));
     }
 
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;recordDamage(Lnet/minecraft/world/damagesource/DamageSource;FF)V"))
     private void onHurt(DamageSource source, float amount, CallbackInfo ci) {
+        if (source.getEntity() == null) {
+
+        }
         LivingApi.Hurt.ON_DAMAGED.invoker().call(source, source.getEntity(), XAttr.get(this), amount, isCritAttack);
     }
 }

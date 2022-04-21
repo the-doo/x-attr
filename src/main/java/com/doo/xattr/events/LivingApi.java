@@ -7,6 +7,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Arrays;
@@ -57,8 +58,8 @@ public interface LivingApi {
          * <p>
          * -2 -> amount - 2
          */
-        Event<HurtValue> ADD = EventFactory.createArrayBacked(HurtValue.class,
-                callback -> ((source, attacker, target) -> Arrays.stream(callback).mapToDouble(c -> c.get(source, attacker, target)).sum()));
+        Event<HurtValue> ADD = EventFactory.createArrayBacked(HurtValue.class, callback ->
+                (source, attacker, target) -> Arrays.stream(callback).mapToDouble(c -> c.op(source, attacker, target)).sum());
 
         /**
          * Multiplier of total damage amount - return value in percentage
@@ -70,7 +71,7 @@ public interface LivingApi {
          * -20 -> total * (1 - 0.2)
          */
         Event<HurtValue> MULTIPLIER = EventFactory.createArrayBacked(HurtValue.class, callback ->
-                ((source, attacker, target) -> Arrays.stream(callback).mapToDouble(c -> c.get(source, attacker, target)).sum()));
+                (source, attacker, target) -> Arrays.stream(callback).mapToDouble(c -> c.op(source, attacker, target)).sum());
 
         /**
          * Add real damage amount - It will add after check armor and resistance
@@ -82,7 +83,7 @@ public interface LivingApi {
          * -2 -> amount - 2
          */
         Event<HurtValue> REAL_ADD = EventFactory.createArrayBacked(HurtValue.class, callback ->
-                ((source, attacker, target) -> Arrays.stream(callback).mapToDouble(c -> c.get(source, attacker, target)).sum()));
+                (source, attacker, target) -> Arrays.stream(callback).mapToDouble(c -> c.op(source, attacker, target)).sum());
 
         /**
          * Multiplier of total real damage amount - It will add after check armor and resistance
@@ -94,11 +95,11 @@ public interface LivingApi {
          * -20 -> total * (1 - 0.2)
          */
         Event<HurtValue> REAL_MULTIPLIER = EventFactory.createArrayBacked(HurtValue.class, callback ->
-                ((source, attacker, target) -> Arrays.stream(callback).mapToDouble(c -> c.get(source, attacker, target)).sum()));
+                (source, attacker, target) -> Arrays.stream(callback).mapToDouble(c -> c.op(source, attacker, target)).sum());
 
         @FunctionalInterface
         interface HurtValue {
-            double get(DamageSource source, Entity attacker, LivingEntity target);
+            double op(DamageSource source, Entity attacker, LivingEntity target);
         }
 
         /**
@@ -117,12 +118,12 @@ public interface LivingApi {
         /**
          * Attack is Crit
          */
-        Event<OnCrit> ON_CRIT = EventFactory.createArrayBacked(OnCrit.class, callback ->
-                ((source, attacker, target, amount) -> Arrays.stream(callback).forEach(c -> c.crit(source, attacker, target, amount))));
+        Event<IsCrit> IS_CRIT = EventFactory.createArrayBacked(IsCrit.class, callback ->
+                (attacker, target) -> Arrays.stream(callback).anyMatch(c -> c.crit(attacker, target)));
 
         @FunctionalInterface
-        interface OnCrit {
-            void crit(DamageSource source, Entity attacker, LivingEntity target, float amount);
+        interface IsCrit {
+            boolean crit(Player attacker, Entity target);
         }
     }
 

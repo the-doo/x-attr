@@ -15,7 +15,7 @@
     "ItemStackMixin",
     "LivingEntityMixin",
     "LootTableMixin",
-    "PersistentProjectileEntityMixin",
+    "AbstractArrowMixin",
     "PlayerEntityMixin"
   ],
   "client": [

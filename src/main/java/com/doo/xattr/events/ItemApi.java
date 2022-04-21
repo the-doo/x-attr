@@ -17,26 +17,28 @@ import java.util.Arrays;
  */
 public interface ItemApi {
 
+    Event<OpDamage> ADD_MAX_DAMAGE = EventFactory.createArrayBacked(OpDamage.class,
+            callback -> stack -> Arrays.stream(callback).mapToDouble(c -> c.op(stack)).sum());
+
+    Event<OpDamage> TOTAL_MAX_DAMAGE = EventFactory.createArrayBacked(OpDamage.class,
+            callback -> stack -> Arrays.stream(callback).mapToDouble(c -> c.op(stack)).sum());
+
+    @FunctionalInterface
+    interface OpDamage {
+        double op(ItemStack stack);
+    }
+
     Event<OpModifier> OP_MODIFIER = EventFactory.createArrayBacked(OpModifier.class,
-            callback -> ((map, stack, slot) -> Arrays.stream(callback).forEach(c -> c.mod(map, stack, slot))));
+            callback -> (map, stack, slot) -> Arrays.stream(callback).forEach(c -> c.mod(map, stack, slot)));
 
-    Event<WillDamage> WILL_DAMAGE = EventFactory.createArrayBacked(WillDamage.class,
-            callback -> ((owner, stack, amount) -> Arrays.stream(callback).forEach(c -> c.call(owner, stack, amount))));
-
-
-    /**
-     * Item stack add enchantment
-     */
     @FunctionalInterface
     interface OpModifier {
         void mod(Multimap<Attribute, AttributeModifier> map, ItemStack stack, EquipmentSlot slot);
     }
 
-    /**
-     * Item damage will be changed
-     * <p>
-     * amount - value of damage
-     */
+    Event<WillDamage> WILL_DAMAGE = EventFactory.createArrayBacked(WillDamage.class,
+            callback -> (owner, stack, amount) -> Arrays.stream(callback).forEach(c -> c.call(owner, stack, amount)));
+
     @FunctionalInterface
     interface WillDamage {
         void call(@Nullable LivingEntity owner, ItemStack stack, float amount);

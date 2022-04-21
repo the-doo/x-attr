@@ -29,11 +29,11 @@ public class XAttr implements ModInitializer {
     }
 
     /**
-     * Operation Value
+     * Operation value of base
      *
      * @param base     base value
      * @param instance attribute instance
-     * @return value after operation
+     * @return operation value
      */
     public static double opValue(double base, AttributeInstance instance) {
         if (instance == null) {

@@ -18,7 +18,7 @@ public abstract class ClientMixin {
     public int opMissTime(int interval) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null) {
-            return (int) XAttr.opValue(interval, player.getAttribute(ExAttributes.Living.Hurt.INTERVAL));
+            return (int) XAttr.opValue(interval, player.getAttribute(ExAttributes.Hurt.INTERVAL));
         }
         return interval;
     }

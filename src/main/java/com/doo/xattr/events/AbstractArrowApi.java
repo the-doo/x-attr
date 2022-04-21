@@ -16,7 +16,7 @@ import java.util.Arrays;
 /**
  * Persistent Projectile Entity Api - like EntityDamageApi
  */
-public interface PersistentApi {
+public interface AbstractArrowApi {
 
     Event<OnColl> ON_COLL = EventFactory.createArrayBacked(OnColl.class, callback -> (((player, stack, world, pos, box) -> {
         Entity entity;
@@ -48,12 +48,12 @@ public interface PersistentApi {
     static float projSpeed(float speed, Projectile entity, ItemStack shooter) {
         Entity owner = entity.getOwner();
         if (owner instanceof LivingEntity && shooter != null) {
-            speed += PersistentApi.ADD.invoker().get(owner, shooter);
+            speed += AbstractArrowApi.ADD.invoker().get(owner, shooter);
             if (speed <= 0) {
                 return 0;
             }
 
-            speed *= (1 + PersistentApi.MULTIPLIER.invoker().get(owner, shooter) / 100F);
+            speed *= (1 + AbstractArrowApi.MULTIPLIER.invoker().get(owner, shooter) / 100F);
             if (speed <= 0) {
                 return 0;
             }

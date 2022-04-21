@@ -1,15 +1,17 @@
 package com.doo.xattr.mixin;
 
 import com.doo.xattr.XAttr;
-import com.doo.xattr.attribute.ExAttributes;
 import com.doo.xattr.events.LivingApi;
 import com.doo.xattr.interfaces.Expirable;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.EntityDamageSource;
+import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,7 +37,7 @@ public abstract class LivingEntityMixin {
     @Inject(method = "tick", at = @At(value = "TAIL"))
     private void tickT(CallbackInfo ci) {
         // remove expired attr
-        ((AttrMapAccessor) XAttr.get(getAttributes())).getAttributes().forEach((a, i) -> {
+        XAttr.get(getAttributes(), AttrMapAccessor.class).getAttributes().forEach((a, i) -> {
             Set<AttributeModifier> expired = i.getModifiers()
                     .stream()
                     .filter(m -> ((Expirable) XAttr.get(m)).isExpired())
@@ -62,9 +64,20 @@ public abstract class LivingEntityMixin {
         return LivingApi.Armor.armor(XAttr.get(this), value);
     }
 
+    @ModifyVariable(method = "actuallyHurt", at = @At(value = "STORE", ordinal = 0), argsOnly = true)
+    private float opHurtValue(float amount, DamageSource source) {
+        LivingEntity target = XAttr.get(this);
+        return (float) XAttr.opValue(amount,
+                () -> LivingApi.Hurt.ADD.invoker().op(source, source.getEntity(), target),
+                () -> LivingApi.Hurt.MULTIPLIER.invoker().op(source, source.getEntity(), target));
+    }
+
     @ModifyVariable(method = "actuallyHurt", at = @At(value = "STORE", ordinal = 1), argsOnly = true)
     private float opHurtRealValue(float amount, DamageSource source) {
-        return (float) XAttr.opValue(amount, ((LivingEntity) XAttr.get(this)).getAttribute(ExAttributes.Living.Hurt.REAL_VALUE));
+        LivingEntity target = XAttr.get(this);
+        return (float) XAttr.opValue(amount,
+                () -> LivingApi.Hurt.ADD.invoker().op(source, source.getEntity(), target),
+                () -> LivingApi.Hurt.MULTIPLIER.invoker().op(source, source.getEntity(), target));
     }
 
     @Inject(method = "actuallyHurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;recordDamage(Lnet/minecraft/world/damagesource/DamageSource;FF)V"))

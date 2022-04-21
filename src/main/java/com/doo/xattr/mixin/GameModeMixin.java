@@ -20,7 +20,7 @@ public abstract class GameModeMixin {
     public void opReachValue(CallbackInfoReturnable<Float> cir) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null) {
-            cir.setReturnValue((float) XAttr.opValue(cir.getReturnValue(), player.getAttribute(ExAttributes.Living.Hurt.REACH)));
+            cir.setReturnValue((float) XAttr.opValue(cir.getReturnValue(), player.getAttribute(ExAttributes.Hurt.REACH)));
         }
     }
 }
